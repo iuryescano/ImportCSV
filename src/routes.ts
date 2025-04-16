@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { Readable } from 'stream';
 
 import multer from 'multer';
 
@@ -11,7 +12,13 @@ router.post(
   multerConfig.single("file"), 
   (request: Request, response: Response): void => {
     if (request.file) {
-      console.log(request.file.buffer.toString("utf-8"));
+      const { file } = request;
+      const { buffer } = file; //onde fica o arquivo
+
+      const readableFile = new Readable();
+      readableFile.push(buffer);
+      readableFile.push(null); //vai criar um readable para fazer a leitura do arquivo
+
     } else {
       console.error("Nenhum arquivo enviado.");
       response.status(400).send("Nenhum arquivo enviado.");
