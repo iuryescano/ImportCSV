@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Lotes {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique
+  ativo     Boolean   @default(true)
+  criado_em DateTime  @default(now())
+  boletos   Boletos[] // Relacionamento com a tabela Boletos
+}
+
+model Boletos {
+  id              Int      @id @default(autoincrement())
+  nome_sacado     String
+  id_lote         Int
+  valor           Float
+  linha_digitavel String
+  ativo           Boolean  @default(true)
+  criado_em       DateTime @default(now())
+
+  lote            Lotes    @relation(fields: [id_lote], references: [id]) // Relacionamento com Lotes
+
+  @@index([id_lote]) // Índice para melhorar a performance em consultas por id_lote
+}
