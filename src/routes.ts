@@ -32,8 +32,15 @@ router.post(
       });
 
       const boletos: Boleto[] = [];
+      let isFirstLine = true; // Ignora a primeira linha
 
       for await (let line of boletosLine) {
+
+        if (isFirstLine) {
+          isFirstLine = false;
+          continue; // Ignora a primeira linha
+        }
+
         const boletosLineSplit = line.split(";");
 
         boletos.push({
