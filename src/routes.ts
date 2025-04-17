@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { Readable } from 'stream';
 import * as readline from 'readline';
 
+import { client } from './database/client'; // Certifique-se de que o caminho está correto
+
 import multer from 'multer';
 
 const multerConfig = multer();
@@ -49,6 +51,34 @@ router.post(
           valor: Number(boletosLineSplit[2].replace(",", ".")), // Substitui vírgula por ponto
           linha_digitavel: boletosLineSplit[3],
         });
+      }
+
+      for await ( let { nome_sacado, id_lote, valor, linha_digitavel} of boletos) {
+
+        // Verifica se o lote existe
+        const loteExists = await client.lotes.findUnique({
+          where: { id: id_lote },
+        });
+
+        if (!loteExists) {
+          // Cria o lote se ele não existir
+          await client.lotes.create({
+            data: {
+              id: id_lote,
+              nome: `Lote ${id_lote}`, // Nome genérico para o lote
+              ativo: true
+            },
+          });
+        }
+
+        await client.boletos.create({
+          data: {
+            nome_sacado,
+            id_lote,
+            valor,
+            linha_digitavel,
+          },
+        })
       }
 
       // Envia a resposta com os boletos processados
